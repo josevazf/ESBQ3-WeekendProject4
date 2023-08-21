@@ -1,6 +1,6 @@
 "use client";
 import { WagmiConfig, createConfig } from "wagmi";
-import { mainnet, sepolia, polygon, arbitrum, polygonMumbai } from "wagmi/chains";
+import { sepolia } from "wagmi/chains";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 import Navbar from "@/components/instructionsComponent/navigation/navbar";
 import Footer from "@/components/instructionsComponent/navigation/footer";
@@ -17,7 +17,7 @@ const config = createConfig(
     appName: "You Create Web3 Dapp",
 		chains,
     // Optional
-    appDescription: "Your App Description",
+    appDescription: "Tokenized Ballot",
     appUrl: "https://family.co", // your app's url
     appIcon: "https://family.co/logo.png", // your app's logo,no bigger than 1024x1024px (max. 1MB)
   })
@@ -31,9 +31,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <WagmiConfig config={config}>
-        <ConnectKitProvider theme="retro" mode="dark">
+        <ConnectKitProvider theme="retro">
           <body>
-            <div style={{ display: "flex", flexDirection: "column", minHeight: "105vh" }}>
+            <div style={{ display: "flex", flexDirection: "column", minHeight: "130vh" }}>
               <Navbar />
               <div style={{flexGrow: 1}}>{children}</div>
               <Footer />

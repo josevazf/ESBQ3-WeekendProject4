@@ -1,26 +1,34 @@
 import { useEffect, useState } from "react";
-import { ethers } from 'ethers';
+import { BytesLike, ethers, toNumber } from 'ethers';
 import styles from "./instructionsComponent.module.css";
 import { useAccount, useBalance, useContractRead, useContractWrite, useNetwork, useSignMessage} from "wagmi";
 import * as tokenJson from '../assets/G6Token.json';
+import * as ballotJson from '../assets/TokenizedBallot.json';
+import { Uint } from "web3";
 
 const TOKEN_ADDRESS = '0x9805944Da4F69978dffc4c02eA924911D668d81a';
 const BALLOT_ADDRESS = '0x86194b8C24DB66Ef9ACFA70b4c2fc837F0684961';
 
-export default function InstructionsComponent() {
+export default function Loading() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+      setMounted(true)
+  }, [])
+  
   return (
-    <div className={styles.container}>
-      <header className={styles.header_container}>
-        <div className={styles.header}>
-          <h1>Tokenized Ballot dApp</h1>
-        </div>
-      </header>
-      	<p className={styles.get_started}>
-        <PageBody></PageBody>
-      </p>
-    </div>
-  );
-}
+		mounted && 
+		<div className={styles.container}>
+			<header className={styles.header_container}>
+				<div className={styles.header}>
+					<img src="https://tomato-leading-stoat-542.mypinata.cloud/ipfs/QmPJwPc2cShgc96WxL2qTFeFDkaKr1adxr6ysRmXkDk8rQ"></img>
+				</div>
+			</header>
+				<p className={styles.get_started}>
+					<PageBody></PageBody>
+				</p>
+		</div>
+		);
+ }
 
 function PageBody() {
 	const {address, isConnecting, isDisconnected } = useAccount();
@@ -30,7 +38,7 @@ function PageBody() {
 				<WalletInfo></WalletInfo>
 				<hr></hr>
 				<br></br>
-				<RequestTokensToBeMinted address={address}></RequestTokensToBeMinted>
+				<RequestTokensFromAPI address={address}></RequestTokensFromAPI>
 				<br></br>
 				<br></br>
 				<TokenBalanceFromAPI></TokenBalanceFromAPI>
@@ -43,7 +51,6 @@ function PageBody() {
 				<br></br>
 				<Vote></Vote>
 				<br></br>
-				<WinnerFromAPI></WinnerFromAPI>
 			</div>
 		);
 		if (isConnecting)
@@ -71,11 +78,12 @@ function WalletInfo() {
 	if (address)
     return (
       <div>
-				<p>Connected to the {chain?.name} network </p>
-				<WalletBalance address={address}></WalletBalance>
+				<p>Connected to <i>{chain?.name}</i> network </p>
+				{/* <WalletBalance address={address}></WalletBalance> */}
 				<TokenName></TokenName>
 				<WalletTokenBalance address={address}></WalletTokenBalance>
-				<WalletVotes address={address}></WalletVotes>
+				<WalletVotesFromAPI address={address}></WalletVotesFromAPI>
+				<Winner></Winner>
       </div>
     );
   if (isConnecting)
@@ -129,6 +137,7 @@ function WalletInfo() {
   );
 } */
 
+// Get ETH balance (not used)
 function WalletBalance(params: { address: `0x${string}` }) { // (type_check)enforcing the starting of the string to 0x
   const { data, isError, isLoading } = useBalance({
     address: params.address,
@@ -154,7 +163,7 @@ function TokenName() {
 
   if (isLoading) return <div>Fetching name…</div>;
   if (isError) return <div>Error fetching name</div>;
-  return <div>Token name: {name}</div>;
+  return <div><b>Token: </b> {name}</div>;
 }
 
 function WalletTokenBalance(params: { address: `0x${string}` }) {
@@ -165,15 +174,15 @@ function WalletTokenBalance(params: { address: `0x${string}` }) {
 
   if (isLoading) return <div>Fetching balance…</div>;
   if (isError) return <div>Error fetching balance</div>;
-  return <div>Balance: {data?.formatted} G6TK</div>;
+  return <div><b>Balance: </b>{data?.formatted} G6TK</div>;
 }
 
-function WalletVotes (params: { address: `0x${string}`}) {
+function WalletVotesFromAPI (params: { address: `0x${string}`}) {
 	const [data, setData] = useState<any>(null);
 	const [isLoading, setLoading] = useState(true);
   
 	useEffect(() => {
-	  fetch(`http://localhost:3001/get-token-balance/${params.address}`)
+	  fetch(`http://localhost:3001/get-votes/${params.address}`)
 		.then((res) => res.json())
 		.then((data) => {
 		  setData(data);
@@ -182,11 +191,11 @@ function WalletVotes (params: { address: `0x${string}`}) {
 	}, []);
   
 	if (isLoading) return <p>Loading token balance from API...</p>;
-	if (!data) return <p>No answer from API</p>;
-  
+	if (!data) return <p>Votes:</p>;
+
 	return (
 	  <div>
-		  <p>Votes: {data}</p>
+		  <p><b>Votes: </b>{data}</p>
 	  </div>
 	);
 }
@@ -267,7 +276,7 @@ function VotesFromAPI () {
 		);
 }
 
-function RequestTokensToBeMinted(params: { address: `0x${string}`}) {
+function RequestTokensFromAPI(params: { address: `0x${string}`}) {
 	const [data, setData] = useState<any>(null);
 	const [isLoading, setLoading] = useState(false);
 
@@ -291,7 +300,7 @@ function RequestTokensToBeMinted(params: { address: `0x${string}`}) {
 					});
 			}}
       >
-        Request Tokens
+        Request 100 Tokens
       </button>);
 	return (
 			<div>
@@ -328,14 +337,17 @@ function TransferTokens() {
 					<button
 						disabled={!write}
 						onClick={() =>write ({
-							args: [addressTo, ethers.utils.parseUnits(amount)],
+							args: [addressTo, ethers.parseUnits(amount)],
 						})
 					}
 					>
-						Transfer tokens
+						Transfer Tokens
 					</button>
-					{isLoading && <div>Check Wallet</div>}
-					{isSuccess && <div>Transaction: {JSON.stringify(data)}</div>}
+					{isLoading && <div>Approve in wallet</div>}
+					{isSuccess && <div> 
+						<a target={"_blank"} href={`https://sepolia.etherscan.io/tx/${data?.hash}`}>
+							Transaction details
+      			</a></div>}
 			</div>
 		);
 }
@@ -363,10 +375,14 @@ function DelegateVotes() {
 						})
 					}
 					>
-						Delegate votes
+						Delegate Votes
 					</button>
-					{isLoading && <div>Check Wallet</div>}
-					{isSuccess && <div>Transaction: {JSON.stringify(data)}</div>}
+
+					{isLoading && <div>Approve in wallet</div>}
+					{isSuccess && <div> 
+						<a target={"_blank"} href={`https://sepolia.etherscan.io/tx/${data?.hash}`}>
+							Transaction details
+      			</a></div>}
 			</div>
 		);
 }
@@ -376,7 +392,7 @@ function Vote() {
 	const [amount, setAmount] = useState("");
 	const { data, isLoading, isSuccess, write } = useContractWrite({
     address: BALLOT_ADDRESS,
-    abi: tokenJson.abi,
+    abi: ballotJson.abi,
     functionName: 'vote',
   })
 
@@ -391,7 +407,7 @@ function Vote() {
 					<br></br>
 						<input
 							type='number'
-							value={amount}
+							value={amount as Uint}
 							onChange={(e) => setAmount(e.target.value)}
 							placeholder="Amount"
 						/>
@@ -399,37 +415,58 @@ function Vote() {
 					<button
 						disabled={!write}
 						onClick={() =>write ({
-							args: [proposalNumber, ethers.utils.parseUnits(amount)],
+							args: [toNumber(proposalNumber), ethers.parseUnits(amount)],
 						})
 					}
 					>
 						Vote
 					</button>
-					{isLoading && <div>Check Wallet</div>}
-					{isSuccess && <div>Transaction: {JSON.stringify(data)}</div>}
+					{isLoading && <div>Approve in wallet</div>}
+					{isSuccess && <div> 
+						<a target={"_blank"} href={`https://sepolia.etherscan.io/tx/${data?.hash}`}>
+							Transaction details
+      			</a></div>}
 			</div>
 		);
 }
 
-function WinnerFromAPI () {
+function Winner() {
+	const { data, isError, isLoading } = useContractRead({
+    address: BALLOT_ADDRESS,
+    abi: ballotJson.abi,
+    functionName: 'winnerName',
+  });
+
+  if (isLoading) return <div>Fetching winning proposal…</div>;
+  if (isError) return <div>Error fetching winning proposal</div>;
+  return <div><b>Winning proposal:</b> {ethers.decodeBytes32String(data as BytesLike)}</div>;
+}
+
+// Apparently working but not passing data to frontend
+/* function WinnerFromAPI () {
 	const [data, setData] = useState<any>(null);
-	const [isLoading, setLoading] = useState(true);
-  
-	useEffect(() => {
-	  fetch("http://localhost:3001/winner")
-		.then((res) => res.json())
-		.then((data) => {
-		  setData(data);
-		  setLoading(false);
-		});
-	}, []);
-  
-	if (isLoading) return <p>Loading winner from API...</p>;
-	if (!data) return <p>No answer from API</p>;
-  
+	const [isLoading, setLoading] = useState(false);
+
+	if (isLoading) return <p>Requesting info from API...</p>;
+	if (!data)  
+		return (
+			<button
+        disabled={isLoading}
+        onClick={() =>{
+					setLoading(true);
+					fetch("http://localhost:3001/winner")
+						.then((res) => res.json())
+						.then((data) => {
+							setData(data);
+							setLoading(false);
+					});
+			}}
+      >
+        Winning Proposal
+      </button>);
 	return (
 	  <div>
 		  <p>Winner: {data}</p>
 	  </div>
 	);
-}
+} */
