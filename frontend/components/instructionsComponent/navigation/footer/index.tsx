@@ -6,7 +6,7 @@ export default function Footer() {
       <div className={styles.icons_container}>
         <div>
           <a
-            href="https://github.com/alchemyplatform/create-web3-dapp"
+            href="https://github.com/josevazf/ESBQ3-WeekendProject4_G6"
             target={"_blank"}
           >
             Leave a star on Github
