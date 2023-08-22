@@ -1,16 +1,17 @@
 ## Installation
 
 ```bash
-$ yarn install
+$ npm install
 ```
 
-## Running the app
+## Running the server
 
 ```bash
 # development
-$ yarn run start
+$ npm run start
 
 # watch mode
-$ yarn run start:dev
-
+$ npm run start:dev
 ```
+
+Open [http://localhost:3001](http://localhost:3001) with your browser to see Swagger development server.
