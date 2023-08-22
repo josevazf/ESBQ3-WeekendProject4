@@ -1,6 +1,9 @@
 # Encode Solidity Bootcamp Q3 - Weekend Project 4 - Group 6
 
-## Overview:
+<p align="center">
+  <img src="https://tomato-leading-stoat-542.mypinata.cloud/ipfs/QmPnGnZyP8A5CJSHGNMtq7MdrTFF2zGmvF2t1V9qPTLsvV" width="750" >
+</p>
+
 Decentralized voting application based on previously deployed Token and Tokenized Ballot contracts.
 
 - **Token contract**: 0x9805944Da4F69978dffc4c02eA924911D668d81a
