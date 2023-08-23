@@ -17,6 +17,6 @@ This was implemented using React on the frontend and NodeJS API (Swagger) using 
 ## Setup:
 1. Clone the repository.
 2. Install dependencies with `npm install` within `frontend` and `backend` folders.
-3. For the backend run `npm run start`.
-4. For the frontend run `npm run dev`.
+3. For the backend run `npm run start` and open [http://localhost:3001](http://localhost:3001) with your browser to get to the server interface.
+4. For the frontend run `npm run dev` and open [http://localhost:3000](http://localhost:3000) with your browser to interact with the dApp.
 5. Configure environment variables as necessary.
