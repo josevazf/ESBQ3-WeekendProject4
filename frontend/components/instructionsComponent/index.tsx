@@ -275,28 +275,26 @@ function RequestTokensFromAPI(params: { address: `0x${string}`}) {
 		headers: {'Content-Type': 'application/json'},
 		body: JSON.stringify({address: params.address})
 	}
-	if (!data)  
 		return (
-			<button
-        disabled={isLoading}
-        onClick={() =>{
-					setLoading(true);
-					fetch("http://localhost:3001/mint-tokens", requestOptions)
-						.then((res) => res.json())
-						.then((data) => {
-							setData(data);
-							setLoading(false);
-					});
-			}}
-      >
-        Request 100 Tokens
-      </button>);
-	return (
 			<div>
-				<p>Mint success: {data.success ? 'worked' : 'failed'}</p>
-				<p>Transaction hash: {data.txHash}</p>
+				<button
+					disabled={isLoading}
+					onClick={() =>{
+						setLoading(true);
+						fetch("http://localhost:3001/mint-tokens", requestOptions)
+							.then((res) => res.json())
+							.then((data) => {
+								setData(data);
+								setLoading(false);
+						});
+				}}
+				>
+        	Request 100 Tokens
+      </button>
+				{data !== null && <p><a href={`https://sepolia.etherscan.io/tx/${data.txHash}`}>
+				Transaction details</a></p>}
 			</div>
-	)
+	);
 }
 
 function TransferTokens() {
